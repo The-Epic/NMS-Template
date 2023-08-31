@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+jar.enabled = false
+group = "xyz.epicebic"
+
+allprojects {
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+        maven { url = 'https://repo.epicebic.xyz/public' }
+        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+        maven { url = 'https://oss.sonatype.org/content/repositories/central' }
+    }
+}
+
+dependencies {
+
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    archiveVersion.set('')
+    archiveFileName = "${rootProject.name}-${project.version}.jar"
+}
+
+tasks.register('copyJar', Copy) {
+    def target = System.getenv("plugin-dir")
+
+    if (target != null) {
+        from shadowJar
+        into file(target)
+    }
+}
+
+tasks.register("checkChangedNames") {
+    String rootName = rootProject.name
+    if (rootName == "CHANGEME") {
+        //throw new IllegalArgumentException("Root project name hasnt been changed.")
+    }
+}
+
+build {
+    dependsOn shadowJar
+    finalizedBy copyJar
+}
